@@ -6,10 +6,12 @@ require("./config/passport");
 
 const authRoutes = require("./routes/authRoutes");
 const googleAuthRoutes = require("./routes/googleAuthRoutes");
+const pixelRoutes = require("./routes/pixelRoutes");
 
 const app = express();
 
 app.use(express.json());
+app.use("/api/pixels", pixelRoutes);
 
 app.use(
   session({
