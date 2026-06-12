@@ -10,19 +10,23 @@ const {
   deletePixel
 } = require("../controllers/pixelController");
 
-// Create Pixel Purchase
-router.post("/buy", createPixelPurchase);
+const {
+  protect
+} = require("../middleware/authMiddleware");
 
-// Get All Pixels
+// Create Pixel Purchase (Protected)
+router.post("/buy", protect, createPixelPurchase);
+
+// Get All Pixels (Public)
 router.get("/", getAllPixels);
 
-// Get Single Pixel
+// Get Single Pixel (Public)
 router.get("/:id", getPixelById);
 
-// Update Pixel
-router.put("/:id", updatePixel);
+// Update Pixel (Protected)
+router.put("/:id", protect, updatePixel);
 
-// Delete Pixel
-router.delete("/:id", deletePixel);
+// Delete Pixel (Protected)
+router.delete("/:id", protect, deletePixel);
 
 module.exports = router;

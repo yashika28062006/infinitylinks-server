@@ -1,9 +1,10 @@
 const Pixel = require("../models/Pixel");
 
+
+// CREATE PIXEL
 const createPixelPurchase = async (req, res) => {
   try {
     const {
-      owner,
       title,
       websiteUrl,
       imageUrl,
@@ -17,7 +18,7 @@ const createPixelPurchase = async (req, res) => {
     const amountPaid = totalPixels * 100;
 
     const pixel = await Pixel.create({
-      owner,
+      owner: req.user._id,
       title,
       websiteUrl,
       imageUrl,
@@ -38,6 +39,8 @@ const createPixelPurchase = async (req, res) => {
   }
 };
 
+
+// GET ALL PIXELS
 const getAllPixels = async (req, res) => {
   try {
 
@@ -53,6 +56,8 @@ const getAllPixels = async (req, res) => {
   }
 };
 
+
+// GET SINGLE PIXEL
 const getPixelById = async (req, res) => {
   try {
 
@@ -74,10 +79,27 @@ const getPixelById = async (req, res) => {
   }
 };
 
+
+// UPDATE PIXEL
 const updatePixel = async (req, res) => {
   try {
 
-    const pixel = await Pixel.findByIdAndUpdate(
+    const pixel = await Pixel.findById(req.params.id);
+
+    if (!pixel) {
+      return res.status(404).json({
+        message: "Pixel not found"
+      });
+    }
+
+    // OWNER CHECK
+    if (pixel.owner.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        message: "Not authorized to update this pixel"
+      });
+    }
+
+    const updatedPixel = await Pixel.findByIdAndUpdate(
       req.params.id,
       req.body,
       {
@@ -86,13 +108,7 @@ const updatePixel = async (req, res) => {
       }
     );
 
-    if (!pixel) {
-      return res.status(404).json({
-        message: "Pixel not found"
-      });
-    }
-
-    res.json(pixel);
+    res.json(updatedPixel);
 
   } catch (error) {
     res.status(500).json({
@@ -101,16 +117,27 @@ const updatePixel = async (req, res) => {
   }
 };
 
+
+// DELETE PIXEL
 const deletePixel = async (req, res) => {
   try {
 
-    const pixel = await Pixel.findByIdAndDelete(req.params.id);
+    const pixel = await Pixel.findById(req.params.id);
 
     if (!pixel) {
       return res.status(404).json({
         message: "Pixel not found"
       });
     }
+
+    // OWNER CHECK
+    if (pixel.owner.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        message: "Not authorized to delete this pixel"
+      });
+    }
+
+    await pixel.deleteOne();
 
     res.json({
       success: true,
@@ -123,6 +150,7 @@ const deletePixel = async (req, res) => {
     });
   }
 };
+
 
 module.exports = {
   createPixelPurchase,
